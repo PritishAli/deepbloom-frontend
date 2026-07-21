@@ -1,0 +1,305 @@
+/* =====================================================
+   GLOBAL RESET
+===================================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #0f172a;
+  overflow-x: hidden;
+
+  background:
+    radial-gradient(circle at 10% 15%, rgba(99,102,241,0.25), transparent 45%),
+    radial-gradient(circle at 85% 10%, rgba(14,165,233,0.22), transparent 45%),
+    radial-gradient(circle at 50% 90%, rgba(168,85,247,0.18), transparent 50%),
+    linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+  background-attachment: fixed;
+}
+
+/* =====================================================
+   MAIN CONTAINER
+===================================================== */
+
+.app {
+  max-width: 1250px;
+  margin: auto;
+  padding: 45px 25px;
+}
+
+/* =====================================================
+   NAVIGATION
+===================================================== */
+
+.nav {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 30px;
+  font-weight: 600;
+}
+
+.nav a {
+  text-decoration: none;
+  color: #2563eb;
+  transition: 0.3s ease;
+}
+
+.nav a:hover {
+  color: #7c3aed;
+}
+
+/* =====================================================
+   TITLE
+===================================================== */
+
+.title {
+  text-align: center;
+  font-size: 38px;
+  font-weight: 800;
+  margin-bottom: 45px;
+
+  background: linear-gradient(90deg, #2563eb, #7c3aed, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* =====================================================
+   GLASS CARDS
+===================================================== */
+
+.card {
+  position: relative;
+  padding: 30px;
+  margin-bottom: 28px;
+  border-radius: 20px;
+
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  border: 1px solid rgba(255, 255, 255, 0.8);
+
+  box-shadow:
+    0 20px 45px rgba(99, 102, 241, 0.12),
+    0 5px 15px rgba(0, 0, 0, 0.05);
+
+  transition: 0.35s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow:
+    0 30px 60px rgba(99, 102, 241, 0.18),
+    0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* =====================================================
+   TEXTAREA
+===================================================== */
+
+textarea {
+  width: 100%;
+  min-height: 130px;
+  resize: vertical;
+
+  border-radius: 14px;
+  border: 1px solid #cbd5e1;
+
+  background: rgba(255, 255, 255, 0.92);
+
+  color: #0f172a;
+  padding: 18px;
+  font-size: 15px;
+  line-height: 1.6;
+
+  outline: none;
+  transition: 0.25s ease;
+}
+
+textarea:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25);
+}
+
+/* =====================================================
+   INPUT
+===================================================== */
+
+input[type="text"] {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  outline: none;
+
+  background: rgba(255, 255, 255, 0.95);
+}
+
+input[type="text"]:focus {
+  border-color: #6366f1;
+}
+
+/* =====================================================
+   BUTTON
+===================================================== */
+
+button {
+  margin-top: 18px;
+  padding: 13px 26px;
+
+  border-radius: 14px;
+  border: none;
+
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: white;
+
+  cursor: pointer;
+
+  background: linear-gradient(
+    135deg,
+    #2563eb,
+    #7c3aed,
+    #06b6d4
+  );
+
+  transition: 0.3s ease;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.35);
+}
+
+/* =====================================================
+   RESULT BARS
+===================================================== */
+
+.bar-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.bar {
+  flex: 1;
+  height: 12px;
+  background: #e2e8f0;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #4ade80);
+  border-radius: 20px;
+}
+
+/* =====================================================
+   RESEARCH SCORE LAYOUT
+===================================================== */
+
+.research-score {
+  display: flex;
+  gap: 40px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+.score-box {
+  flex: 1;
+  min-width: 280px;
+
+  background: rgba(255, 255, 255, 0.75);
+  padding: 25px;
+  border-radius: 15px;
+  text-align: center;
+
+  border: 1px solid rgba(99, 102, 241, 0.15);
+}
+
+.big-score {
+  font-size: 52px;
+  font-weight: 900;
+  margin: 10px 0;
+
+  background: linear-gradient(90deg, #16a34a, #22c55e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.formula-box {
+  flex: 1;
+  min-width: 280px;
+
+  background: rgba(238, 242, 255, 0.9);
+  padding: 25px;
+  border-radius: 15px;
+
+  border: 1px solid rgba(99, 102, 241, 0.18);
+}
+
+.formula-box h4 {
+  margin-top: 0;
+}
+
+/* =====================================================
+   CHART AREA
+===================================================== */
+
+.recharts-wrapper {
+  margin-top: 30px;
+}
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 900px) {
+  .research-score {
+    flex-direction: column;
+  }
+}
+.stats-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:20px;
+  margin-bottom:30px;
+}
+
+.stat-card{
+  background:white;
+  border-radius:20px;
+  padding:25px;
+  text-align:center;
+
+  box-shadow:
+  0 10px 25px rgba(0,0,0,0.08);
+}
+
+.stat-card h3{
+  margin:0;
+  font-size:2rem;
+  color:#4f46e5;
+}
+
+.stat-card p{
+  margin-top:10px;
+  opacity:0.8;
+}
+
+.workflow{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
+  font-size:1.05rem;
+  font-weight:500;
+}
