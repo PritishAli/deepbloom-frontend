@@ -39,7 +39,7 @@ function V2Page() {
       }
 
       const response = await fetch(
-  "http://127.0.0.1:8000/deepbloom-v2/adapt",
+  "https://translated-tournament-influenced-roles.trycloudflare.com/deepbloom-v2/adapt",
         {
           method: "POST",
           headers: {
@@ -69,7 +69,7 @@ function V2Page() {
       if (!compareQuestion.trim()) return;
 
       const v1res = await fetch(
-  "http://127.0.0.1:8000/deepbloom-v2/predict",
+  "https://translated-tournament-influenced-roles.trycloudflare.com/deepbloom-v2/predict",
         {
           method: "POST",
           headers: {
@@ -84,7 +84,7 @@ function V2Page() {
       const v1data = await v1res.json();
 
       const v2res = await fetch(
-  "http://127.0.0.1:8000/predict",
+  "https://translated-tournament-influenced-roles.trycloudflare.com/predict",
         {
           method: "POST",
           headers: {
