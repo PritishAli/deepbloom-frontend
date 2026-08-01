@@ -34,7 +34,7 @@ function V1Page() {
   // ================= SINGLE QUESTION =================
   const predict = async () => {
     const response = await fetch(
-  "http://127.0.0.1:8000/predict", {
+  "https://translated-tournament-influenced-roles.trycloudflare.com/predict", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text: question }),
@@ -52,7 +52,7 @@ function V1Page() {
       .filter((q) => q.length > 0);
 
     const response = await fetch(
-  "http://127.0.0.1:8000/analyze-assessment",
+  "https://translated-tournament-influenced-roles.trycloudflare.com/analyze-assessment",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -70,7 +70,7 @@ function V1Page() {
     formData.append("file", pdfFile);
 
     const response = await fetch(
-  "http://127.0.0.1:8000/upload-paper",
+  "https://translated-tournament-influenced-roles.trycloudflare.com/upload-paper",
       {
         method: "POST",
         body: formData,
