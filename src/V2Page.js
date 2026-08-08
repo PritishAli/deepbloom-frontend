@@ -39,7 +39,7 @@ function V2Page() {
       }
 
       const response = await fetch(
-  "https://translated-tournament-influenced-roles.trycloudflare.com/deepbloom-v2/adapt",
+  "https://pritish0007-pritishdeepbloombackend.hf.space/deepbloom-v2/adapt",
         {
           method: "POST",
           headers: {
