@@ -65,52 +65,60 @@ function V2Page() {
   };
 
   const compare = async () => {
-    try {
-      if (!compareQuestion.trim()) return;
+  try {
+    if (!compareQuestion.trim()) return;
 
-      const v1res = await fetch(
-  "https://translated-tournament-influenced-roles.trycloudflare.com/deepbloom-v2/predict",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            text: compareQuestion,
-          }),
-        }
-      );
-
-      const v1data = await v1res.json();
-
-      const v2res = await fetch(
-  "https://translated-tournament-influenced-roles.trycloudflare.com/predict",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            user_id: userId,
-            text: compareQuestion,
-          }),
-        }
-      );
-
-      const v2data = await v2res.json();
-
-      setV1Score(
-        v1data?.top_predictions?.[0]?.confidence || 0
-      );
-
-      setV2Score(
-        v2data?.confidence || 0
-      );
-    } catch (err) {
-      console.error(err);
-      alert("Comparison failed");
+    if (!userId.trim()) {
+      alert("Enter User ID first");
+      return;
     }
-  };
+
+    // ================= V1 =================
+    const v1res = await fetch(
+      "https://pritish0007-pritishdeepbloombackend.hf.space/predict",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: compareQuestion,
+        }),
+      }
+    );
+
+    const v1data = await v1res.json();
+
+    // ================= V2 =================
+    const v2res = await fetch(
+      "https://pritish0007-pritishdeepbloombackend.hf.space/deepbloom-v2/predict",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          text: compareQuestion,
+        }),
+      }
+    );
+
+    const v2data = await v2res.json();
+
+    setV1Score(
+      v1data?.top_predictions?.[0]?.confidence || 0
+    );
+
+    setV2Score(
+      v2data?.confidence || 0
+    );
+
+  } catch (err) {
+    console.error(err);
+    alert("Comparison failed");
+  }
+};
 
   const chartData = [
     {
