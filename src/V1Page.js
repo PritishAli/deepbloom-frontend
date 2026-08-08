@@ -11,7 +11,7 @@ import {
   ResponsiveContainer,
   Legend
 } from "recharts";
-
+const API = process.env.REACT_APP_API_URL;
 const COLORS = [
   "#6366F1",
   "#22C55E",
@@ -57,6 +57,7 @@ function V1Page() {
     alert("Prediction failed. Check the console.");
   }
 };
+
   // ================= ASSESSMENT =================
   const analyzeAssessment = async () => {
   try {
@@ -88,8 +89,9 @@ function V1Page() {
     alert("Assessment analysis failed.");
   }
 };
+
   // ================= PDF =================
-  const handlePdfUpload = async () => {
+ const handlePdfUpload = async () => {
   try {
     if (!pdfFile) {
       alert("Please select a PDF first.");
@@ -126,6 +128,7 @@ function V1Page() {
     alert("PDF analysis failed.");
   }
 };
+
   const chartData =
     analysisData &&
     Object.entries(analysisData.cognitive_distribution_percent)
