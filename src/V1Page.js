@@ -33,47 +33,84 @@ function V1Page() {
 
   // ================= SINGLE QUESTION =================
   const predict = async () => {
+  try {
     const response = await fetch(
-  "https://pritish0007-pritishdeepbloombackend.hf.space/predict", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: question }),
-    });
+      "https://pritish0007-pritishdeepbloombackend.hf.space/predict",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text: question }),
+      }
+    );
 
     const data = await response.json();
-    setResult(data);
-  };
 
+    if (!response.ok) {
+      throw new Error(data.detail || "Prediction failed");
+    }
+
+    setResult(data);
+  } catch (error) {
+    console.error("Prediction error:", error);
+    alert("Prediction failed. Check the console.");
+  }
+};
   // ================= ASSESSMENT =================
   const analyzeAssessment = async () => {
+  try {
     const questions = assessmentText
       .split("\n")
       .map((q) => q.trim())
       .filter((q) => q.length > 0);
 
-    "https://pritish0007-pritishdeepbloombackend.hf.space/analyze-assessment",
+    const response = await fetch(
+      "https://pritish0007-pritishdeepbloombackend.hf.space/analyze-assessment",
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ questions }),
       }
     );
 
     const data = await response.json();
-    setAnalysisData(data);
-  };
 
+    if (!response.ok) {
+      throw new Error(data.detail || "Assessment analysis failed");
+    }
+
+    setAnalysisData(data);
+  } catch (error) {
+    console.error("Assessment error:", error);
+    alert("Assessment analysis failed.");
+  }
+};
   // ================= PDF =================
   const handlePdfUpload = async () => {
+  try {
+    if (!pdfFile) {
+      alert("Please select a PDF first.");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("file", pdfFile);
 
-    "https://pritish0007-pritishdeepbloombackend.hf.space/upload-paper",
+    const response = await fetch(
+      "https://pritish0007-pritishdeepbloombackend.hf.space/upload-paper",
       {
         method: "POST",
         body: formData,
       }
     );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || "PDF analysis failed");
+    }
 
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
@@ -82,8 +119,13 @@ function V1Page() {
     a.href = url;
     a.download = "DeepBloom_Report.pdf";
     a.click();
-  };
 
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("PDF error:", error);
+    alert("PDF analysis failed.");
+  }
+};
   const chartData =
     analysisData &&
     Object.entries(analysisData.cognitive_distribution_percent)
