@@ -34,7 +34,7 @@ function V1Page() {
   // ================= SINGLE QUESTION =================
   const predict = async () => {
     const response = await fetch(
-  "https://translated-tournament-influenced-roles.trycloudflare.com/predict", {
+  "https://pritish0007-pritishdeepbloombackend.hf.space/predict", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text: question }),
@@ -51,8 +51,7 @@ function V1Page() {
       .map((q) => q.trim())
       .filter((q) => q.length > 0);
 
-    const response = await fetch(
-  "https://translated-tournament-influenced-roles.trycloudflare.com/analyze-assessment",
+    "https://pritish0007-pritishdeepbloombackend.hf.space/analyze-assessment",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -69,8 +68,7 @@ function V1Page() {
     const formData = new FormData();
     formData.append("file", pdfFile);
 
-    const response = await fetch(
-  "https://translated-tournament-influenced-roles.trycloudflare.com/upload-paper",
+    "https://pritish0007-pritishdeepbloombackend.hf.space/upload-paper",
       {
         method: "POST",
         body: formData,
