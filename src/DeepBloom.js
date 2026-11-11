@@ -326,7 +326,7 @@ function SetResults({ data, choice, onDownloadReport }) {
 
       <h3 className="table-title">Distribution across the six levels</h3>
       <div className="table-wrap">
-        <table>
+        <table className="stack dist">
           <thead>
             <tr>
               <th scope="col">Level</th>
@@ -338,12 +338,12 @@ function SetResults({ data, choice, onDownloadReport }) {
           <tbody>
             {LEVELS.map((l) => (
               <tr key={l.key}>
-                <td>
+                <td data-label="Level">
                   <LevelTag name={l.key} />
                 </td>
-                <td className="muted">{l.meaning}</td>
-                <td className="num">{counts[l.key] || 0}</td>
-                <td>
+                <td className="muted hide-s" data-label="Meaning">{l.meaning}</td>
+                <td className="num" data-label="Questions">{counts[l.key] || 0}</td>
+                <td data-label="Share">
                   <span className="share">
                     <span className="share-track">
                       <span className={`share-fill ${l.tone}`} style={{ width: `${share[l.key] || 0}%` }} />
@@ -371,7 +371,7 @@ function SetResults({ data, choice, onDownloadReport }) {
         </div>
       </div>
       <div className="table-wrap">
-        <table className="questions">
+        <table className="questions stack">
           <thead>
             <tr>
               <th scope="col" className="num">#</th>
@@ -385,15 +385,15 @@ function SetResults({ data, choice, onDownloadReport }) {
             {rows.map((r, i) => {
               return (
                 <tr key={`${i}-${r.question}`} style={{ "--i": i }}>
-                  <td className="num muted">{i + 1}</td>
-                  <td className="q">{r.question}</td>
-                  <td>
+                  <td className="num muted qn" data-label="#">{i + 1}</td>
+                  <td className="q" data-label="Question">{r.question}</td>
+                  <td data-label="Bloom level">
                     <LevelTag name={r.label} />
                   </td>
-                  <td>
+                  <td data-label="Confidence">
                     <ConfidenceBar value={r.confidence} />
                   </td>
-                  {isEnsemble && <td>DeepBloom {r.model_name}</td>}
+                  {isEnsemble && <td data-label="Answered by">DeepBloom {r.model_name}</td>}
                 </tr>
               );
             })}
@@ -505,7 +505,7 @@ function SingleQuestion({ choice, available, onBusy }) {
 
           <h3 className="table-title">{result.outputs.length > 1 ? "Results of each model" : "Model result"}</h3>
           <div className="table-wrap">
-            <table>
+            <table className="stack">
               <thead>
                 <tr>
                   <th scope="col">Model</th>
@@ -518,16 +518,16 @@ function SingleQuestion({ choice, available, onBusy }) {
               <tbody>
                 {result.outputs.map((o) => (
                   <tr key={o.model} className={o.model === result.chosen.model ? "row-chosen" : ""}>
-                    <td>{MODELS[o.model].name}</td>
-                    <td>
+                    <td data-label="Model">{MODELS[o.model].name}</td>
+                    <td data-label="Predicted level">
                       <LevelTag name={o.prediction} />
                     </td>
-                    <td>
+                    <td data-label="Confidence">
                       <ConfidenceBar value={o.confidence} />
                     </td>
-                    <td className="num">{Math.round(o.time_ms)} ms</td>
+                    <td className="num" data-label="Response time">{Math.round(o.time_ms)} ms</td>
                     {result.outputs.length > 1 && (
-                      <td>{o.model === result.chosen.model ? <span className="badge">Most confident</span> : null}</td>
+                      <td className="hide-empty" data-label="">{o.model === result.chosen.model ? <span className="badge">Most confident</span> : null}</td>
                     )}
                   </tr>
                 ))}
@@ -936,7 +936,7 @@ export default function DeepBloom() {
 
           <h3 className="table-title">Accuracy of the models in our benchmark</h3>
           <div className="table-wrap">
-            <table>
+            <table className="stack">
               <thead>
                 <tr>
                   <th scope="col">Model</th>
@@ -950,12 +950,12 @@ export default function DeepBloom() {
               <tbody>
                 {BENCHMARK.map((b) => (
                   <tr key={b.model}>
-                    <td>{b.model}</td>
-                    <td className="num">{b.params}</td>
-                    <td className="num">{b.d1}%</td>
-                    <td className="num">{b.d2}%</td>
-                    <td className="num">{b.d3}%</td>
-                    <td className="muted">{b.speed}</td>
+                    <td data-label="Model">{b.model}</td>
+                    <td className="num" data-label="Size">{b.params}</td>
+                    <td className="num" data-label="Dataset 1">{b.d1}%</td>
+                    <td className="num" data-label="Dataset 2">{b.d2}%</td>
+                    <td className="num" data-label="Dataset 3">{b.d3}%</td>
+                    <td className="muted" data-label="Training speed">{b.speed}</td>
                   </tr>
                 ))}
               </tbody>

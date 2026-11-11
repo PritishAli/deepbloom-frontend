@@ -1409,6 +1409,87 @@ td.q {
   }
 }
 
+@media (max-width: 640px) {
+  /* tables turn into labelled cards on small screens */
+  .stack thead {
+    display: none;
+  }
+  .stack,
+  .stack tbody,
+  .stack tr,
+  .stack td {
+    display: block;
+    width: 100%;
+  }
+  .stack tr {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .stack tbody tr:last-child {
+    border-bottom: 0;
+  }
+  .stack td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 5px 16px;
+    border: 0;
+    text-align: right;
+  }
+  .stack td::before {
+    content: attr(data-label);
+    flex: none;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--muted);
+    text-align: left;
+  }
+  .stack td.q {
+    display: block;
+    text-align: left;
+    font-weight: 700;
+    min-width: 0;
+  }
+  .stack td.q::before,
+  .stack td.qn {
+    display: none;
+  }
+  .stack .hide-s,
+  .stack td.hide-empty:empty {
+    display: none;
+  }
+  .stack td.hide-empty::before {
+    content: none;
+  }
+  .stack .conf,
+  .stack .share {
+    min-width: 0;
+    width: 60%;
+  }
+  .row-chosen td:first-child {
+    box-shadow: none;
+  }
+  .row-chosen {
+    box-shadow: inset 4px 0 0 var(--bloom);
+  }
+  tbody tr:hover td {
+    background: transparent;
+  }
+  .step h2 {
+    font-size: 22px;
+  }
+  .verdict-level {
+    font-size: 48px;
+  }
+  .table-actions {
+    width: 100%;
+  }
+  .table-actions .btn {
+    flex: 1;
+  }
+}
+
 @media (max-width: 520px) {
   body {
     font-size: 16px;
