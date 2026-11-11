@@ -95,11 +95,6 @@ function toCSV(rows) {
   return rows.map((r) => r.map(esc).join(",")).join("\r\n");
 }
 
-function agreementOf(row) {
-  if (!row.per_model) return null;
-  const preds = Object.values(row.per_model).map((p) => p.level);
-  return { agree: preds.filter((p) => p === row.label).length, total: preds.length };
-}
 
 /* Shows a hint when the server is slow to answer (for example after a cold start). */
 function useSlowHint(active, ms = 8000) {
@@ -151,6 +146,46 @@ function BloomLadder({ active, confidence, compact }) {
         );
       })}
     </ol>
+  );
+}
+
+/* The brand mark: a six-petal bloom, one petal per cognitive level */
+const PETAL = "M0 0 C -46 -30, -42 -96, 0 -120 C 42 -96, 46 -30, 0 0 Z";
+
+function BloomMark({ size = 28 }) {
+  return (
+    <svg className="bloom-mark" width={size} height={size} viewBox="-130 -130 260 260" aria-hidden="true">
+      {LEVELS.map((l, i) => (
+        <path key={l.key} d={PETAL} className={`petal ${l.tone}`} transform={`rotate(${i * 60})`} />
+      ))}
+      <circle r="20" className="bloom-core" />
+    </svg>
+  );
+}
+
+function BloomFlower() {
+  return (
+    <figure className="flower">
+      <svg viewBox="-230 -230 460 460" role="img" aria-label="The six levels of Bloom's Taxonomy as the petals of a flower">
+        {LEVELS.map((l, i) => {
+          const a = ((i * 60 - 90) * Math.PI) / 180;
+          const r = 192;
+          return (
+            <g key={l.key} className="petal-group" style={{ "--d": `${i * 90}ms` }}>
+              <path d={PETAL} className={`petal ${l.tone}`} transform={`rotate(${i * 60}) scale(1.3)`} />
+              <text x={Math.cos(a) * r} y={Math.sin(a) * r} className="petal-label" textAnchor="middle" dominantBaseline="middle">
+                {l.key}
+              </text>
+            </g>
+          );
+        })}
+        <circle r="34" className="bloom-core" />
+        <text y="1" className="core-label" textAnchor="middle" dominantBaseline="middle">
+          6 levels
+        </text>
+      </svg>
+      <figcaption>From recalling facts to creating something new</figcaption>
+    </figure>
   );
 }
 
@@ -247,15 +282,7 @@ function SetResults({ data, choice, onDownloadReport }) {
 
   const exportCSV = () => {
     const header = ["#", "Question", "Bloom level", "Confidence", "Model"];
-    if (isEnsemble) header.push("Models agreeing");
-    const body = rows.map((r, i) => {
-      const line = [i + 1, r.question, r.label, r.confidence, `DeepBloom ${r.model_name}`];
-      if (isEnsemble) {
-        const a = agreementOf(r);
-        line.push(a ? `${a.agree} of ${a.total}` : "");
-      }
-      return line;
-    });
+    const body = rows.map((r, i) => [i + 1, r.question, r.label, r.confidence, `DeepBloom ${r.model_name}`]);
     downloadBlob(new Blob([toCSV([header, ...body])], { type: "text/csv" }), "DeepBloom_results.csv");
   };
 
@@ -272,7 +299,7 @@ function SetResults({ data, choice, onDownloadReport }) {
             {data.complexity_score_out_of_10}
             <small> / 10</small>
           </dd>
-          <dd className="summary-sub">{data.complexity_level}</dd>
+          <dd className="summary-sub">{data.complexity_level}. Higher means more demanding questions.</dd>
         </div>
         <div>
           <dt>Most frequent level</dt>
@@ -283,7 +310,7 @@ function SetResults({ data, choice, onDownloadReport }) {
         <div>
           <dt>Higher-order questions</dt>
           <dd>{higher.toFixed(0)}%</dd>
-          <dd className="summary-sub">Analyze, Evaluate, Create</dd>
+          <dd className="summary-sub">Questions at Analyze, Evaluate, or Create</dd>
         </div>
       </dl>
 
@@ -351,13 +378,11 @@ function SetResults({ data, choice, onDownloadReport }) {
               <th scope="col">Question</th>
               <th scope="col">Bloom level</th>
               <th scope="col">Confidence</th>
-              {isEnsemble && <th scope="col">Chosen model</th>}
-              {isEnsemble && <th scope="col" className="num">Agreement</th>}
+              {isEnsemble && <th scope="col">Answered by</th>}
             </tr>
           </thead>
           <tbody>
             {rows.map((r, i) => {
-              const a = agreementOf(r);
               return (
                 <tr key={`${i}-${r.question}`} style={{ "--i": i }}>
                   <td className="num muted">{i + 1}</td>
@@ -368,8 +393,7 @@ function SetResults({ data, choice, onDownloadReport }) {
                   <td>
                     <ConfidenceBar value={r.confidence} />
                   </td>
-                  {isEnsemble && <td>{r.model_name}</td>}
-                  {isEnsemble && <td className="num">{a ? `${a.agree} of ${a.total}` : "–"}</td>}
+                  {isEnsemble && <td>DeepBloom {r.model_name}</td>}
                 </tr>
               );
             })}
@@ -425,7 +449,7 @@ function SingleQuestion({ choice, available, onBusy }) {
       return;
     }
     const chosen = ok.reduce((a, b) => (b.confidence > a.confidence ? b : a));
-    setResult({ question: q, outputs: ok, chosen, agree: ok.filter((o) => o.prediction === chosen.prediction).length });
+    setResult({ question: q, outputs: ok, chosen });
   };
 
   const level = result ? levelOf(result.chosen.prediction) : null;
@@ -472,8 +496,8 @@ function SingleQuestion({ choice, available, onBusy }) {
               <p className={`verdict-level ${level.tone}`}>{level.key}</p>
               <p className="verdict-meaning">{level.meaning}.</p>
               <p className="verdict-meta">
-                Confidence {pct(result.chosen.confidence)} from {MODELS[result.chosen.model].name}
-                {result.outputs.length > 1 && `. ${result.agree} of ${result.outputs.length} models predicted this level`}
+                Confidence {pct(result.chosen.confidence)}, answered by {MODELS[result.chosen.model].name}
+                {result.outputs.length > 1 && ", the most confident of the three models"}
               </p>
             </div>
             <BloomLadder active={level.key} confidence={result.chosen.confidence} compact />
@@ -513,7 +537,7 @@ function SingleQuestion({ choice, available, onBusy }) {
 
           <div className="two-col">
             <div>
-              <h3 className="table-title">Three most likely levels</h3>
+              <h3 className="table-title">How sure the model is</h3>
               <div className="table-wrap">
                 <table>
                   <thead>
@@ -540,15 +564,23 @@ function SingleQuestion({ choice, available, onBusy }) {
               </div>
             </div>
             <div>
-              <h3 className="table-title">Linguistic insight</h3>
-              <ul className="insight-list">
-                {(result.chosen.explanation || []).map((e) => (
-                  <li key={e}>{e}</li>
-                ))}
-              </ul>
+              <h3 className="table-title">Why this level?</h3>
+              <div className="why">
+                <p>
+                  A <strong>{level.key}</strong> question asks learners to {level.meaning.toLowerCase()}. Questions at
+                  this level often use words such as <em>{level.verbs}</em>.
+                </p>
+                {(result.chosen.explanation || []).length > 0 && (
+                  <ul>
+                    {result.chosen.explanation.map((e) => (
+                      <li key={e}>{e}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
               <p className="fine">
-                These notes come from action-verb rules and help you read the result. The level itself is predicted by
-                the model from the whole question.
+                The model reads the whole question, not only its key words, so a question can belong to a level even
+                when its first word suggests another one.
               </p>
             </div>
           </div>
@@ -796,49 +828,49 @@ export default function DeepBloom() {
   const toolIndex = TOOLS.findIndex((t) => t.key === tool);
 
   return (
-    <div className="page">
-      <header className="topbar">
-        <a className="wordmark" href="#top">
-          <span className="wordmark-mark" aria-hidden="true">
-            {LEVELS.map((l) => (
-              <span key={l.key} className={l.tone} />
-            ))}
-          </span>
-          DeepBloom
-        </a>
-        <nav className="topnav" aria-label="Sections">
-          <a href="#classify">Classify</a>
-          <a href="#how">How it works</a>
-        </nav>
-        <span className={`server ${server}`} title="Status of the classification server">
-          <span className="server-dot" aria-hidden="true" />
-          {server === "ready" && "Models online"}
-          {server === "checking" && "Connecting"}
-          {server === "offline" && "Server waking up"}
-        </span>
-      </header>
-
-      <main id="top">
-        <section className="hero">
-          <div className="hero-copy">
-            <h1>See which level of Bloom&rsquo;s Taxonomy every exam question tests.</h1>
-            <p className="lede">
-              DeepBloom reads each question with fine-tuned transformer models and places it on one of six cognitive
-              levels, from recalling facts to creating something new. Check a single question, a question bank, or a
-              complete question paper.
-            </p>
-            <a className="btn primary" href="#classify">
-              Start classifying
+    <div className="site">
+      <div className="band">
+        <div className="page">
+          <header className="topbar">
+            <a className="wordmark" href="#top">
+              <BloomMark size={28} />
+              DeepBloom
             </a>
-          </div>
-          <div className="hero-ladder">
-            <BloomLadder />
-          </div>
-        </section>
+            <nav className="topnav" aria-label="Sections">
+              <a href="#classify">Classify</a>
+              <a href="#how">How it works</a>
+            </nav>
+            <span className={`server ${server}`} title="Status of the classification server">
+              <span className="server-dot" aria-hidden="true" />
+              {server === "ready" && "Models online"}
+              {server === "checking" && "Connecting"}
+              {server === "offline" && "Server waking up"}
+            </span>
+          </header>
 
+          <section className="hero" id="top">
+            <div className="hero-copy">
+              <h1>See which level of Bloom&rsquo;s Taxonomy every exam question tests.</h1>
+              <p className="lede">
+                DeepBloom reads each question with fine-tuned transformer models and places it on one of six cognitive
+                levels, from recalling facts to creating something new. Check a single question, a question bank, or a
+                complete question paper.
+              </p>
+              <a className="btn bloom" href="#classify">
+                Start classifying
+              </a>
+            </div>
+            <div className="hero-flower">
+              <BloomFlower />
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <main className="page">
         <section id="classify" className="workspace">
           <div className="step">
-            <h2>Choose a model</h2>
+            <h2><span className="step-num">1</span>Choose a model</h2>
             <p className="muted step-help">
               All four options classify into the same six levels. DistilBERT answers fastest; the combined option runs
               all three models and keeps the most confident answer.
@@ -851,7 +883,7 @@ export default function DeepBloom() {
           </div>
 
           <div className="step">
-            <h2>Choose what to analyze</h2>
+            <h2><span className="step-num">2</span>Choose what to analyze</h2>
             <div className="tabs" role="tablist" aria-label="Analysis type" style={{ "--tab": toolIndex }}>
               {TOOLS.map((t) => (
                 <button
@@ -934,14 +966,13 @@ export default function DeepBloom() {
             DistilBERT differ significantly from that of BERT or RoBERTa.
           </p>
         </section>
+        <footer className="footer">
+          <p>
+            DeepBloom classifies questions into the six levels of the revised Bloom&rsquo;s Taxonomy. Predictions support,
+            and do not replace, the judgement of teachers.
+          </p>
+        </footer>
       </main>
-
-      <footer className="footer">
-        <p>
-          DeepBloom classifies questions into the six levels of the revised Bloom&rsquo;s Taxonomy. Predictions support, and do
-          not replace, the judgement of teachers.
-        </p>
-      </footer>
     </div>
   );
 }
