@@ -33,7 +33,7 @@ const CHOICES = [
     key: "ensemble",
     engine: "Best of DistilBERT, BERT and RoBERTa",
     detail: "Runs all three models",
-    note: "Shows the most confident answer",
+    note: "Shows the most confident cognitive level",
     models: ["distilbert", "bert", "roberta"],
   },
 ];
@@ -50,22 +50,27 @@ const AUTHORS = [
   },
 ];
 
+/* Example questions taken from the DeepBloom training data, one for each level. */
 const EXAMPLES = [
-  "Define the term photosynthesis.",
-  "Explain why the sky appears blue during the day.",
-  "Compare mitosis and meiosis in terms of their outcomes.",
-  "Design an experiment to test the effect of light on plant growth.",
+  "Name the four major food groups.",
+  "Explain in your own words what a recessive gene is.",
+  "Calculate the deflection of a beam under uniform loading.",
+  "Distinguish between micro and macro economics.",
+  "Evaluate appropriate and inappropriate actions of characters.",
+  "Design a building according to given specifications.",
 ];
 
 const SAMPLE_SET = [
-  "List the planets of the solar system in order from the Sun.",
-  "Describe how a bill becomes a law in a parliamentary system.",
-  "Solve the equation 3x + 7 = 22 and check your answer.",
-  "Differentiate between renewable and non-renewable resources with examples.",
-  "Evaluate the impact of social media on the study habits of students.",
-  "Create a lesson plan that teaches fractions using everyday objects.",
-  "Summarize the main causes of the First World War.",
-  "Apply Ohm's law to find the current through a 10 ohm resistor at 5 volts.",
+  "List the steps involved in titration.",
+  "What is a global variable?",
+  "Describe characteristics and importance of secondary market.",
+  "Summarize this magazine article.",
+  "Use Laplace to solve the following problems",
+  "Calculate the market demand and market supply in table form.",
+  "Compare two of the characters in this book.",
+  "Compare and contrast two characters in the book.",
+  "Evaluate the corrosion monitoring needs of a chemical processing plant.",
+  "Create a storyboard for a sequel to your book. Use the same characters.",
 ].join("\n");
 
 /* ------------------------------------------------------------------ */
@@ -190,7 +195,7 @@ function BloomFlower() {
           6 levels
         </text>
       </svg>
-      <figcaption>From recalling facts to creating something new</figcaption>
+      <figcaption>Bloom&rsquo;s Taxonomy</figcaption>
     </figure>
   );
 }
@@ -242,7 +247,7 @@ function RunStatus({ status }) {
             </span>
             <span className="run-name">{MODELS[k].name}</span>
             <span className="run-state">
-              {s.state === "running" && "Classifying…"}
+              {s.state === "running" && "Assessing…"}
               {s.state === "done" && (s.ms != null ? `Done in ${Math.round(s.ms)} ms` : "Done")}
               {s.state === "error" && "Not available"}
             </span>
@@ -470,7 +475,7 @@ function SingleQuestion({ choice, available, onBusy }) {
         id="single-q"
         rows={3}
         value={text}
-        placeholder="For example: Compare mitosis and meiosis in terms of their outcomes."
+        placeholder="For example: Distinguish between micro and macro economics."
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) run();
@@ -486,7 +491,7 @@ function SingleQuestion({ choice, available, onBusy }) {
       </div>
       <div className="actions">
         <button type="button" className={`btn primary ${busy ? "is-busy" : ""}`} onClick={run} disabled={busy}>
-          {busy ? "Classifying…" : "Classify question"}
+          {busy ? "Assessing…" : "Cognitive assessment"}
         </button>
         <span className="hint">Ctrl + Enter also works</span>
       </div>
@@ -828,6 +833,34 @@ function InstituteLogo() {
   );
 }
 
+/* Animates a number from 0 up to its value once it is known. */
+function useCountUp(target, ms = 1400) {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    if (target === null) return undefined;
+    let reduce = false;
+    try {
+      reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    } catch (e) {
+      reduce = false;
+    }
+    if (reduce || target < 2) {
+      setValue(target);
+      return undefined;
+    }
+    let raf;
+    const start = performance.now();
+    const tick = (now) => {
+      const t = Math.min(1, (now - start) / ms);
+      setValue(Math.round(target * (1 - Math.pow(1 - t, 3))));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, ms]);
+  return value;
+}
+
 /* Counts one visit per browser session on the DeepBloom server and shows the total. */
 function VisitCounter() {
   const [count, setCount] = useState(null);
@@ -856,10 +889,11 @@ function VisitCounter() {
       alive = false;
     };
   }, []);
+  const shown = useCountUp(count);
   if (count === null) return null;
   return (
     <p className="visits" aria-live="polite">
-      <span className="visits-num">{count.toLocaleString("en-IN")}</span>
+      <span className="visits-num">{shown.toLocaleString("en-IN")}</span>
       <span className="muted">visits since launch</span>
     </p>
   );
@@ -909,7 +943,7 @@ export default function DeepBloom() {
               DeepBloom
             </a>
             <nav className="topnav" aria-label="Sections">
-              <a href="#classify">Classify</a>
+              <a href="#classify">Assessment</a>
               <a href="#about">About</a>
             </nav>
             <span className={`server ${server}`} title="Status of the classification server">
@@ -922,13 +956,9 @@ export default function DeepBloom() {
 
           <section className="hero" id="top">
             <div className="hero-copy">
-              <h1>Find the Bloom&rsquo;s Taxonomy level of any exam question.</h1>
-              <p className="lede">
-                Type a question, paste a list of questions, or upload a question paper. DeepBloom tells you which of the
-                six levels each question tests, from remembering facts to creating something new.
-              </p>
+              <h1>Transformer-based framework for cognitive assessment of questions</h1>
               <a className="btn bloom" href="#classify">
-                Start classifying
+                Start cognitive assessment
               </a>
             </div>
             <div className="hero-flower">
@@ -941,22 +971,18 @@ export default function DeepBloom() {
       <main className="page">
         <section id="classify" className="workspace">
           <div className="step">
-            <h2><span className="step-num">1</span>Choose a model</h2>
-            <p className="muted step-help">
-              All four options classify into the same six levels. DistilBERT answers fastest, and the last option runs
-              all three models and shows the most confident answer.
-            </p>
+            <h2><span className="step-num">1</span>Select model</h2>
             <ModelSelector value={choice} onChange={setChoice} disabled={anyBusy} available={available} />
             <p className="selection-line" aria-live="polite">
               Using <strong>DeepBloom ({current.engine})</strong>
               {current.key === "ensemble"
-                ? ": DistilBERT, BERT and RoBERTa all run, and you see the most confident answer."
+                ? ": DistilBERT, BERT and RoBERTa all run, and you see the most confident cognitive level."
                 : `, ${current.detail}.`}
             </p>
           </div>
 
           <div className="step">
-            <h2><span className="step-num">2</span>Choose what to analyze</h2>
+            <h2><span className="step-num">2</span>Submit question</h2>
             <div className="tabs" role="tablist" aria-label="Analysis type" style={{ "--tab": toolIndex }}>
               {TOOLS.map((t) => (
                 <button
@@ -1036,8 +1062,7 @@ export default function DeepBloom() {
           </div>
 
           <p className="fine about-note">
-            DeepBloom classifies questions into the six levels of the revised Bloom&rsquo;s Taxonomy. Its predictions
-            support, and do not replace, the judgement of teachers. &copy; {new Date().getFullYear()} NITTTR Kolkata.
+            <strong>DeepBloom</strong> &copy; {new Date().getFullYear()} NITTTR Kolkata
           </p>
         </footer>
       </main>
