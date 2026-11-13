@@ -52,12 +52,12 @@ const AUTHORS = [
 
 /* Example questions taken from the DeepBloom training data, one for each level. */
 const EXAMPLES = [
-  "Name the four major food groups.",
-  "Explain in your own words what a recessive gene is.",
-  "Calculate the deflection of a beam under uniform loading.",
-  "Distinguish between micro and macro economics.",
-  "Evaluate appropriate and inappropriate actions of characters.",
-  "Design a building according to given specifications.",
+  { q: "Name the four major food groups.", tone: "l1" },
+  { q: "Explain in your own words what a recessive gene is.", tone: "l2" },
+  { q: "Calculate the deflection of a beam under uniform loading.", tone: "l3" },
+  { q: "Distinguish between micro and macro economics.", tone: "l4" },
+  { q: "Evaluate appropriate and inappropriate actions of characters.", tone: "l5" },
+  { q: "Design a building according to given specifications.", tone: "l6" },
 ];
 
 const SAMPLE_SET = [
@@ -484,8 +484,8 @@ function SingleQuestion({ choice, available, onBusy }) {
       <div className="examples">
         <span className="muted">Try an example:</span>
         {EXAMPLES.map((ex) => (
-          <button key={ex} type="button" className="chip" onClick={() => setText(ex)}>
-            {ex}
+          <button key={ex.q} type="button" className={`chip chip-${ex.tone}`} onClick={() => setText(ex.q)}>
+            {ex.q}
           </button>
         ))}
       </div>
@@ -899,7 +899,43 @@ function VisitCounter() {
   );
 }
 
+/* Pointer effects for every interactive surface: a light that follows the
+   cursor (CSS variables --mx and --my) and a ripple from the point of a click. */
+const FX_SELECTOR = ".btn, .choice, .chip, .tab, .topnav a";
+
+function usePointerEffects() {
+  useEffect(() => {
+    const move = (e) => {
+      const el = e.target.closest && e.target.closest(FX_SELECTOR);
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      el.style.setProperty("--mx", `${e.clientX - r.left}px`);
+      el.style.setProperty("--my", `${e.clientY - r.top}px`);
+    };
+    const down = (e) => {
+      const el = e.target.closest && e.target.closest(".btn, .choice, .chip, .tab");
+      if (!el || el.disabled) return;
+      const r = el.getBoundingClientRect();
+      const size = Math.max(r.width, r.height) * 2.2;
+      const dot = document.createElement("span");
+      dot.className = "ripple";
+      dot.style.width = dot.style.height = `${size}px`;
+      dot.style.left = `${e.clientX - r.left - size / 2}px`;
+      dot.style.top = `${e.clientY - r.top - size / 2}px`;
+      el.appendChild(dot);
+      dot.addEventListener("animationend", () => dot.remove());
+    };
+    document.addEventListener("pointermove", move, { passive: true });
+    document.addEventListener("pointerdown", down);
+    return () => {
+      document.removeEventListener("pointermove", move);
+      document.removeEventListener("pointerdown", down);
+    };
+  }, []);
+}
+
 export default function DeepBloom() {
+  usePointerEffects();
   const [choice, setChoice] = useState("distilbert");
   const [tool, setTool] = useState("single");
   const [available, setAvailable] = useState({});

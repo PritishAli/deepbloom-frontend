@@ -207,9 +207,6 @@ a {
   box-shadow: 0 10px 28px -12px rgba(224, 69, 123, 0.8);
 }
 
-.btn.bloom:hover {
-  background: var(--bloom-deep);
-}
 
 /* workspace overlaps the band */
 main.page > .workspace {
@@ -754,10 +751,6 @@ textarea:focus {
   color: #fff;
 }
 
-.btn.primary:hover:not(:disabled) {
-  background: var(--night);
-  box-shadow: 0 8px 20px -10px rgba(26, 16, 51, 0.6);
-}
 
 /* moving sheen while a request is running */
 .btn.primary.is-busy {
@@ -1560,36 +1553,6 @@ td.q {
   50% { filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.75)); }
 }
 
-/* Primary call to action: lift, glow and a light sweep */
-.btn.bloom {
-  transition: background-color 0.25s var(--ease), transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
-}
-
-.btn.bloom:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 18px 36px -14px rgba(224, 69, 123, 0.95);
-}
-
-.btn.bloom::after,
-.btn.primary::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.35) 50%, transparent 65%);
-  transform: translateX(-120%);
-  pointer-events: none;
-}
-
-.btn.bloom:hover::after,
-.btn.primary:hover:not(:disabled)::before {
-  transform: translateX(120%);
-  transition: transform 0.75s var(--ease);
-}
-
-.btn.primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-}
-
 /* Navigation links draw an underline */
 .topnav a {
   position: relative;
@@ -1663,6 +1626,213 @@ td.q {
   }
 }
 
+/* ------------------------------------------------------------------ */
+/* Interaction layer: cursor light, click ripple, coloured hovers      */
+/* ------------------------------------------------------------------ */
+
+.btn,
+.choice,
+.chip,
+.tab {
+  position: relative;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Ripple from the point of a click (created in usePointerEffects) */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 70%);
+  transform: scale(0);
+  animation: ripple 0.65s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+  z-index: 0;
+}
+
+.choice:not(.selected) .ripple,
+.chip .ripple,
+.tab .ripple,
+.btn.ghost .ripple {
+  background: radial-gradient(circle, rgba(122, 76, 240, 0.28) 0%, rgba(122, 76, 240, 0) 70%);
+}
+
+@keyframes ripple {
+  from { transform: scale(0); opacity: 1; }
+  to { transform: scale(1); opacity: 0; }
+}
+
+/* Cursor light shared by buttons and cards */
+.btn::before,
+.choice::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s var(--ease);
+  background: radial-gradient(160px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.38), transparent 70%);
+}
+
+.btn:hover:not(:disabled)::before,
+.choice:hover:not(:disabled)::before {
+  opacity: 1;
+}
+
+.choice:not(.selected)::before {
+  background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), rgba(224, 69, 123, 0.12), rgba(122, 76, 240, 0.06) 45%, transparent 75%);
+}
+
+.btn.ghost::before {
+  background: radial-gradient(140px circle at var(--mx, 50%) var(--my, 50%), rgba(224, 69, 123, 0.16), transparent 70%);
+}
+
+.btn > *,
+.choice > * {
+  position: relative;
+  z-index: 1;
+}
+
+.choice > .choice-check {
+  position: absolute;
+}
+
+/* Hero call to action: pink-to-violet gradient that shifts, and a halo cycling
+   through the six level colours while the pointer rests on it */
+.btn.bloom {
+  background: linear-gradient(110deg, var(--bloom) 0%, #b0409f 45%, var(--focus) 100%);
+  background-size: 220% 100%;
+  background-position: 0% 0;
+  padding: 15px 28px;
+  font-size: 17px;
+  border-radius: 999px;
+  box-shadow: 0 12px 30px -12px rgba(224, 69, 123, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: background-position 0.6s var(--ease), transform 0.25s var(--ease), box-shadow 0.3s var(--ease);
+}
+
+.btn.bloom:hover {
+  background-position: 100% 0;
+  transform: translateY(-3px) scale(1.02);
+  animation: halo 3s linear infinite;
+}
+
+.btn.bloom:active {
+  transform: translateY(0) scale(0.96);
+  transition-duration: 0.08s;
+}
+
+@keyframes halo {
+  0%   { box-shadow: 0 0 0 4px rgba(53, 103, 176, 0.45), 0 18px 40px -12px rgba(53, 103, 176, 0.9); }
+  17%  { box-shadow: 0 0 0 4px rgba(31, 138, 150, 0.45), 0 18px 40px -12px rgba(31, 138, 150, 0.9); }
+  33%  { box-shadow: 0 0 0 4px rgba(63, 143, 69, 0.45), 0 18px 40px -12px rgba(63, 143, 69, 0.9); }
+  50%  { box-shadow: 0 0 0 4px rgba(185, 138, 18, 0.45), 0 18px 40px -12px rgba(185, 138, 18, 0.9); }
+  67%  { box-shadow: 0 0 0 4px rgba(208, 97, 42, 0.45), 0 18px 40px -12px rgba(208, 97, 42, 0.9); }
+  83%  { box-shadow: 0 0 0 4px rgba(176, 53, 101, 0.45), 0 18px 40px -12px rgba(176, 53, 101, 0.9); }
+  100% { box-shadow: 0 0 0 4px rgba(53, 103, 176, 0.45), 0 18px 40px -12px rgba(53, 103, 176, 0.9); }
+}
+
+/* Main action buttons: deep violet that brightens toward the bloom accent */
+.btn.primary {
+  background: linear-gradient(120deg, var(--night-2) 0%, #4a2a96 55%, var(--focus) 100%);
+  background-size: 200% 100%;
+  background-position: 0% 0;
+  box-shadow: 0 8px 18px -12px rgba(26, 16, 51, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  transition: background-position 0.5s var(--ease), transform 0.2s var(--ease), box-shadow 0.3s var(--ease);
+}
+
+.btn.primary:hover:not(:disabled) {
+  background: linear-gradient(120deg, var(--night-2) 0%, #4a2a96 55%, var(--focus) 100%);
+  background-size: 200% 100%;
+  background-position: 100% 0;
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 3px rgba(122, 76, 240, 0.22), 0 16px 30px -14px rgba(122, 76, 240, 0.95),
+    inset 0 -2px 0 var(--bloom);
+}
+
+.btn.primary:active:not(:disabled) {
+  transform: translateY(0) scale(0.96);
+  transition-duration: 0.08s;
+}
+
+/* Secondary buttons */
+.btn.ghost {
+  transition: border-color 0.25s var(--ease), color 0.25s var(--ease), background-color 0.25s var(--ease),
+    transform 0.2s var(--ease), box-shadow 0.25s var(--ease);
+}
+
+.btn.ghost:hover:not(:disabled) {
+  border-color: var(--bloom);
+  color: var(--bloom-deep);
+  background: var(--bloom-soft);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px -14px rgba(224, 69, 123, 0.9);
+}
+
+.btn.ghost:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+/* Model cards */
+.choice:hover:not(:disabled):not(.selected) {
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px rgba(122, 76, 240, 0.12), 0 18px 32px -20px rgba(26, 16, 51, 0.6);
+}
+
+.choice:active:not(:disabled) {
+  transform: scale(0.97);
+  transition-duration: 0.08s;
+}
+
+.choice.selected {
+  animation: choose 0.45s var(--ease);
+}
+
+@keyframes choose {
+  0% { transform: scale(0.97); }
+  60% { transform: scale(1.015); }
+  100% { transform: scale(1); }
+}
+
+/* Example chips take the colour of the level they belong to */
+.chip {
+  transition: background-color 0.2s var(--ease), border-color 0.2s var(--ease), color 0.2s var(--ease),
+    transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+
+.chip-l1 { --tone: var(--l1); --tone-soft: var(--l1-soft); }
+.chip-l2 { --tone: var(--l2); --tone-soft: var(--l2-soft); }
+.chip-l3 { --tone: var(--l3); --tone-soft: var(--l3-soft); }
+.chip-l4 { --tone: var(--l4); --tone-soft: var(--l4-soft); }
+.chip-l5 { --tone: var(--l5); --tone-soft: var(--l5-soft); }
+.chip-l6 { --tone: var(--l6); --tone-soft: var(--l6-soft); }
+
+.chip[class*="chip-l"]:hover {
+  background: var(--tone-soft);
+  border-color: var(--tone);
+  color: var(--tone);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px -10px var(--tone);
+}
+
+.chip:active {
+  transform: scale(0.95);
+}
+
+/* Tabs */
+.tab {
+  transition: color 0.2s var(--ease), background-color 0.2s var(--ease);
+}
+
+.tab:hover:not(.active) {
+  color: var(--focus);
+  background: rgba(122, 76, 240, 0.07);
+}
+
+.tab:active {
+  transform: scale(0.97);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1677,8 +1847,12 @@ td.q {
   .band::before,
   .band::after,
   .flower svg,
-  .flower .bloom-core {
+  .flower .bloom-core,
+  .btn.bloom:hover {
     animation: none !important;
+  }
+  .ripple {
+    display: none;
   }
 }
 
