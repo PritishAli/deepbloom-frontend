@@ -1713,7 +1713,7 @@ td.q {
 
 .btn.bloom:hover {
   background-position: 100% 0;
-  transform: translateY(-3px) scale(1.02);
+  transform: translateY(-3px);
   animation: halo 3s linear infinite;
 }
 
@@ -1782,16 +1782,6 @@ td.q {
 .choice:active:not(:disabled) {
   transform: scale(0.97);
   transition-duration: 0.08s;
-}
-
-.choice.selected {
-  animation: choose 0.45s var(--ease);
-}
-
-@keyframes choose {
-  0% { transform: scale(0.97); }
-  60% { transform: scale(1.015); }
-  100% { transform: scale(1); }
 }
 
 /* Example chips take the colour of the level they belong to */
