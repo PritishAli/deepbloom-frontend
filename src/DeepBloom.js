@@ -20,21 +20,33 @@ const LEVEL_BY_KEY = Object.fromEntries(LEVELS.map((l) => [l.key, l]));
 const levelOf = (name) => LEVEL_BY_KEY[name] || LEVEL_BY_KEY[name === "Analyse" ? "Analyze" : "Remember"];
 
 const MODELS = {
-  distilbert: { name: "DeepBloom DistilBERT", short: "DistilBERT", size: "66M parameters", note: "Lightweight and fastest" },
-  bert: { name: "DeepBloom BERT", short: "BERT", size: "110M parameters", note: "Heavyweight" },
-  roberta: { name: "DeepBloom RoBERTa", short: "RoBERTa", size: "125M parameters", note: "Heavyweight" },
+  distilbert: { name: "DeepBloom (DistilBERT)", short: "DistilBERT", size: "66M parameters", note: "Lightweight and fastest" },
+  bert: { name: "DeepBloom (BERT)", short: "BERT", size: "110M parameters", note: "Heavyweight" },
+  roberta: { name: "DeepBloom (RoBERTa)", short: "RoBERTa", size: "125M parameters", note: "Heavyweight" },
 };
 
 const CHOICES = [
-  { key: "distilbert", title: "DeepBloom DistilBERT", detail: "66M parameters", note: "Lightweight and fastest", models: ["distilbert"] },
-  { key: "bert", title: "DeepBloom BERT", detail: "110M parameters", note: "Heavyweight", models: ["bert"] },
-  { key: "roberta", title: "DeepBloom RoBERTa", detail: "125M parameters", note: "Heavyweight", models: ["roberta"] },
+  { key: "distilbert", engine: "with DistilBERT", detail: "66M parameters", note: "Lightweight and fastest", models: ["distilbert"] },
+  { key: "bert", engine: "with BERT", detail: "110M parameters", note: "Heavyweight", models: ["bert"] },
+  { key: "roberta", engine: "with RoBERTa", detail: "125M parameters", note: "Heavyweight", models: ["roberta"] },
   {
     key: "ensemble",
-    title: "All three, best result",
-    detail: "DistilBERT + BERT + RoBERTa",
-    note: "Keeps the most confident answer",
+    engine: "Best of DistilBERT, BERT and RoBERTa",
+    detail: "Runs all three models",
+    note: "Shows the most confident answer",
     models: ["distilbert", "bert", "roberta"],
+  },
+];
+
+const AUTHORS = [
+  {
+    name: "Pritish Ali",
+    role: "Department of Computer Science and Engineering",
+  },
+  {
+    name: "Indrajit Saha",
+    role: "Department of Computer Science and Engineering",
+    email: "indrajit@nitttrkol.ac.in",
   },
 ];
 
@@ -55,12 +67,6 @@ const SAMPLE_SET = [
   "Summarize the main causes of the First World War.",
   "Apply Ohm's law to find the current through a 10 ohm resistor at 5 volts.",
 ].join("\n");
-
-const BENCHMARK = [
-  { model: "DeepBloom DistilBERT", params: "66M", d1: "67.55", d2: "80.23", d3: "78.61", speed: "Fastest" },
-  { model: "DeepBloom BERT", params: "110M", d1: "67.89", d2: "81.06", d3: "77.22", speed: "1.7–1.9× slower per epoch" },
-  { model: "DeepBloom RoBERTa", params: "125M", d1: "68.26", d2: "80.37", d3: "70.83", speed: "1.7–1.9× slower per epoch" },
-];
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                             */
@@ -209,7 +215,8 @@ function ModelSelector({ value, onChange, disabled, available }) {
             <span className="choice-check" aria-hidden="true">
               <svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7" /></svg>
             </span>
-            <span className="choice-title">{c.title}</span>
+            <span className="choice-title">DeepBloom</span>
+            <span className="choice-engine">({c.engine})</span>
             <span className="choice-detail">{c.detail}</span>
             <span className="choice-note">{c.note}</span>
           </button>
@@ -282,7 +289,7 @@ function SetResults({ data, choice, onDownloadReport }) {
 
   const exportCSV = () => {
     const header = ["#", "Question", "Bloom level", "Confidence", "Model"];
-    const body = rows.map((r, i) => [i + 1, r.question, r.label, r.confidence, `DeepBloom ${r.model_name}`]);
+    const body = rows.map((r, i) => [i + 1, r.question, r.label, r.confidence, `DeepBloom (${r.model_name})`]);
     downloadBlob(new Blob([toCSV([header, ...body])], { type: "text/csv" }), "DeepBloom_results.csv");
   };
 
@@ -393,7 +400,7 @@ function SetResults({ data, choice, onDownloadReport }) {
                   <td data-label="Confidence">
                     <ConfidenceBar value={r.confidence} />
                   </td>
-                  {isEnsemble && <td data-label="Answered by">DeepBloom {r.model_name}</td>}
+                  {isEnsemble && <td data-label="Answered by">DeepBloom ({r.model_name})</td>}
                 </tr>
               );
             })}
@@ -793,6 +800,71 @@ const TOOLS = [
   { key: "paper", label: "Question paper" },
 ];
 
+/* ------------------------------------------------------------------ */
+/* About: institute logo and visit counter                            */
+/* ------------------------------------------------------------------ */
+
+const LOGO_SOURCES = [
+  `${process.env.PUBLIC_URL}/nitttr-kolkata-logo.png`,
+  "https://ws.nitttrkol.ac.in/images/logo.png",
+];
+
+function InstituteLogo() {
+  const [index, setIndex] = useState(0);
+  if (index >= LOGO_SOURCES.length) {
+    return (
+      <span className="inst-logo inst-fallback" aria-label="NITTTR Kolkata">
+        NITTTR
+      </span>
+    );
+  }
+  return (
+    <img
+      className="inst-logo"
+      src={LOGO_SOURCES[index]}
+      alt="NITTTR Kolkata logo"
+      onError={() => setIndex((i) => i + 1)}
+    />
+  );
+}
+
+/* Counts one visit per browser session on the DeepBloom server and shows the total. */
+function VisitCounter() {
+  const [count, setCount] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    let counted = false;
+    try {
+      counted = sessionStorage.getItem("deepbloom-visit") === "1";
+    } catch (e) {
+      counted = false;
+    }
+    const req = counted ? fetch(`${API}/visits`) : fetch(`${API}/visit`, { method: "POST" });
+    req
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("no counter"))))
+      .then((d) => {
+        if (!alive || typeof d.visits !== "number") return;
+        setCount(d.visits);
+        try {
+          sessionStorage.setItem("deepbloom-visit", "1");
+        } catch (e) {
+          /* storage unavailable: the visit may be counted again */
+        }
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+  if (count === null) return null;
+  return (
+    <p className="visits" aria-live="polite">
+      <span className="visits-num">{count.toLocaleString("en-IN")}</span>
+      <span className="muted">visits since launch</span>
+    </p>
+  );
+}
+
 export default function DeepBloom() {
   const [choice, setChoice] = useState("distilbert");
   const [tool, setTool] = useState("single");
@@ -838,7 +910,7 @@ export default function DeepBloom() {
             </a>
             <nav className="topnav" aria-label="Sections">
               <a href="#classify">Classify</a>
-              <a href="#how">How it works</a>
+              <a href="#about">About</a>
             </nav>
             <span className={`server ${server}`} title="Status of the classification server">
               <span className="server-dot" aria-hidden="true" />
@@ -850,11 +922,10 @@ export default function DeepBloom() {
 
           <section className="hero" id="top">
             <div className="hero-copy">
-              <h1>See which level of Bloom&rsquo;s Taxonomy every exam question tests.</h1>
+              <h1>Find the Bloom&rsquo;s Taxonomy level of any exam question.</h1>
               <p className="lede">
-                DeepBloom reads each question with fine-tuned transformer models and places it on one of six cognitive
-                levels, from recalling facts to creating something new. Check a single question, a question bank, or a
-                complete question paper.
+                Type a question, paste a list of questions, or upload a question paper. DeepBloom tells you which of the
+                six levels each question tests, from remembering facts to creating something new.
               </p>
               <a className="btn bloom" href="#classify">
                 Start classifying
@@ -872,13 +943,15 @@ export default function DeepBloom() {
           <div className="step">
             <h2><span className="step-num">1</span>Choose a model</h2>
             <p className="muted step-help">
-              All four options classify into the same six levels. DistilBERT answers fastest; the combined option runs
-              all three models and keeps the most confident answer.
+              All four options classify into the same six levels. DistilBERT answers fastest, and the last option runs
+              all three models and shows the most confident answer.
             </p>
             <ModelSelector value={choice} onChange={setChoice} disabled={anyBusy} available={available} />
             <p className="selection-line" aria-live="polite">
-              Using <strong>{current.title}</strong>
-              {current.key === "ensemble" ? ", which runs DistilBERT, BERT, and RoBERTa together." : ` (${current.detail}).`}
+              Using <strong>DeepBloom ({current.engine})</strong>
+              {current.key === "ensemble"
+                ? ": DistilBERT, BERT and RoBERTa all run, and you see the most confident answer."
+                : `, ${current.detail}.`}
             </p>
           </div>
 
@@ -914,62 +987,57 @@ export default function DeepBloom() {
           </div>
         </section>
 
-        <section id="how" className="how">
-          <h2>How DeepBloom works</h2>
-          <ol className="how-steps">
-            <li>
-              <h3>Choose a model</h3>
-              <p>Pick one of the three fine-tuned transformers, or run all three and keep the most confident answer.</p>
-            </li>
-            <li>
-              <h3>Add your questions</h3>
-              <p>Type one question, paste a question bank, or upload a numbered PDF question paper.</p>
-            </li>
-            <li>
-              <h3>Read the results</h3>
-              <p>
-                See the level of each question, its confidence, the spread across all six levels, and the Cognitive
-                Complexity Index of the whole set.
+        <footer id="about" className="about">
+          <div className="about-inst">
+            <InstituteLogo />
+            <div>
+              <p className="about-kicker">Developed at</p>
+              <h2>National Institute of Technical Teachers&rsquo; Training and Research, Kolkata</h2>
+              <p className="muted">
+                Department of Computer Science and Engineering, Block FC, Sector III, Salt Lake City, Kolkata 700106,
+                India
               </p>
-            </li>
-          </ol>
-
-          <h3 className="table-title">Accuracy of the models in our benchmark</h3>
-          <div className="table-wrap">
-            <table className="stack">
-              <thead>
-                <tr>
-                  <th scope="col">Model</th>
-                  <th scope="col" className="num">Size</th>
-                  <th scope="col" className="num">Dataset 1</th>
-                  <th scope="col" className="num">Dataset 2</th>
-                  <th scope="col" className="num">Dataset 3</th>
-                  <th scope="col">Training speed</th>
-                </tr>
-              </thead>
-              <tbody>
-                {BENCHMARK.map((b) => (
-                  <tr key={b.model}>
-                    <td data-label="Model">{b.model}</td>
-                    <td className="num" data-label="Size">{b.params}</td>
-                    <td className="num" data-label="Dataset 1">{b.d1}%</td>
-                    <td className="num" data-label="Dataset 2">{b.d2}%</td>
-                    <td className="num" data-label="Dataset 3">{b.d3}%</td>
-                    <td className="muted" data-label="Training speed">{b.speed}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            </div>
           </div>
-          <p className="fine">
-            Test accuracy averaged over three runs on three public question datasets. On no dataset did the accuracy of
-            DistilBERT differ significantly from that of BERT or RoBERTa.
-          </p>
-        </section>
-        <footer className="footer">
-          <p>
-            DeepBloom classifies questions into the six levels of the revised Bloom&rsquo;s Taxonomy. Predictions support,
-            and do not replace, the judgement of teachers.
+
+          <div className="about-grid">
+            <div>
+              <h3>Developed by</h3>
+              <ul className="people">
+                {AUTHORS.map((a) => (
+                  <li key={a.name}>
+                    <span className="person-mark" aria-hidden="true">
+                      {a.name
+                        .split(" ")
+                        .map((w) => w[0])
+                        .join("")}
+                    </span>
+                    <span>
+                      <strong>{a.name}</strong>
+                      <span className="muted person-role">{a.role}, NITTTR Kolkata</span>
+                      {a.email && (
+                        <a className="person-mail" href={`mailto:${a.email}`}>
+                          {a.email}
+                        </a>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3>Contact</h3>
+              <p className="muted">
+                For questions, feedback, or to use DeepBloom in your institution, write to{" "}
+                <a href="mailto:indrajit@nitttrkol.ac.in">indrajit@nitttrkol.ac.in</a>.
+              </p>
+              <VisitCounter />
+            </div>
+          </div>
+
+          <p className="fine about-note">
+            DeepBloom classifies questions into the six levels of the revised Bloom&rsquo;s Taxonomy. Its predictions
+            support, and do not replace, the judgement of teachers. &copy; {new Date().getFullYear()} NITTTR Kolkata.
           </p>
         </footer>
       </main>
