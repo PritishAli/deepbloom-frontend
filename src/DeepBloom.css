@@ -207,7 +207,6 @@ a {
   box-shadow: 0 10px 28px -12px rgba(224, 69, 123, 0.8);
 }
 
-
 /* workspace overlaps the band */
 main.page > .workspace {
   margin-top: -88px;
@@ -508,11 +507,6 @@ main.page > .workspace {
 
 .choice:hover:not(:disabled) {
   border-color: var(--night-2);
-  transform: translateY(-2px);
-}
-
-.choice:active:not(:disabled) {
-  transform: scale(0.97);
 }
 
 .choice.selected {
@@ -706,10 +700,6 @@ textarea:focus {
   background: var(--surface);
 }
 
-.chip:active {
-  transform: scale(0.96);
-}
-
 .actions {
   display: flex;
   flex-wrap: wrap;
@@ -737,10 +727,6 @@ textarea:focus {
     box-shadow 0.2s var(--ease);
 }
 
-.btn:active:not(:disabled) {
-  transform: scale(0.97);
-}
-
 .btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
@@ -750,7 +736,6 @@ textarea:focus {
   background: var(--night-2);
   color: #fff;
 }
-
 
 /* moving sheen while a request is running */
 .btn.primary.is-busy {
@@ -883,7 +868,6 @@ textarea:focus {
 .run.done .run-icon {
   background: var(--l3);
   color: #fff;
-  animation: pop 0.35s var(--ease);
 }
 
 .run.error {
@@ -1507,50 +1491,21 @@ td.q {
 }
 
 @keyframes hero-rise {
-  from { opacity: 0; transform: translateY(26px); filter: blur(6px); }
-  to { opacity: 1; transform: none; filter: none; }
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
 }
 
-/* The flower keeps breathing after it unfolds; each petal answers the pointer */
+/* Petals */
 .flower svg > .petal-group .petal {
   transition: filter 0.3s var(--ease), opacity 0.3s var(--ease);
-}
-
-.flower svg {
-  animation: breathe 7s ease-in-out 1.4s infinite;
-  transform-origin: center;
-}
-
-@keyframes breathe {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.035); }
 }
 
 .flower .petal-group {
   cursor: default;
 }
 
-.flower .petal-group:hover .petal {
-  opacity: 1;
-  filter: brightness(1.25) drop-shadow(0 0 18px rgba(255, 255, 255, 0.45));
-}
-
 .flower .petal-label {
   transition: fill 0.3s var(--ease), letter-spacing 0.3s var(--ease);
-}
-
-.flower .petal-group:hover .petal-label {
-  fill: #fff;
-  letter-spacing: 0.04em;
-}
-
-.flower .bloom-core {
-  animation: core-glow 3.5s ease-in-out infinite;
-}
-
-@keyframes core-glow {
-  0%, 100% { filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0)); }
-  50% { filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.75)); }
 }
 
 /* Navigation links draw an underline */
@@ -1580,17 +1535,9 @@ td.q {
   box-shadow: 0 16px 30px -18px rgba(26, 16, 51, 0.55);
 }
 
-.choice.selected .choice-check {
-  animation: pop 0.35s var(--ease);
-}
-
 /* About section */
 .inst-logo {
   transition: transform 0.4s var(--ease);
-}
-
-.about-inst:hover .inst-logo {
-  transform: rotate(-6deg) scale(1.05);
 }
 
 .person-mark {
@@ -1598,7 +1545,6 @@ td.q {
 }
 
 .people li:hover .person-mark {
-  transform: translateY(-2px);
   box-shadow: inset 0 -2px 0 var(--bloom), 0 8px 18px -8px rgba(224, 69, 123, 0.7);
 }
 
@@ -1627,7 +1573,7 @@ td.q {
 }
 
 /* ------------------------------------------------------------------ */
-/* Interaction layer: cursor light, click ripple, coloured hovers      */
+/* Interaction layer: colour and shadow changes only                 */
 /* ------------------------------------------------------------------ */
 
 .btn,
@@ -1639,67 +1585,7 @@ td.q {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Ripple from the point of a click (created in usePointerEffects) */
-.ripple {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 70%);
-  transform: scale(0);
-  animation: ripple 0.65s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
-  z-index: 0;
-}
-
-.choice:not(.selected) .ripple,
-.chip .ripple,
-.tab .ripple,
-.btn.ghost .ripple {
-  background: radial-gradient(circle, rgba(122, 76, 240, 0.28) 0%, rgba(122, 76, 240, 0) 70%);
-}
-
-@keyframes ripple {
-  from { transform: scale(0); opacity: 1; }
-  to { transform: scale(1); opacity: 0; }
-}
-
-/* Cursor light shared by buttons and cards */
-.btn::before,
-.choice::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.3s var(--ease);
-  background: radial-gradient(160px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.38), transparent 70%);
-}
-
-.btn:hover:not(:disabled)::before,
-.choice:hover:not(:disabled)::before {
-  opacity: 1;
-}
-
-.choice:not(.selected)::before {
-  background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), rgba(224, 69, 123, 0.12), rgba(122, 76, 240, 0.06) 45%, transparent 75%);
-}
-
-.btn.ghost::before {
-  background: radial-gradient(140px circle at var(--mx, 50%) var(--my, 50%), rgba(224, 69, 123, 0.16), transparent 70%);
-}
-
-.btn > *,
-.choice > * {
-  position: relative;
-  z-index: 1;
-}
-
-.choice > .choice-check {
-  position: absolute;
-}
-
-/* Hero call to action: pink-to-violet gradient that shifts, and a halo cycling
-   through the six level colours while the pointer rests on it */
+/* Hero call to action: pink-to-violet gradient that shifts on hover */
 .btn.bloom {
   background: linear-gradient(110deg, var(--bloom) 0%, #b0409f 45%, var(--focus) 100%);
   background-size: 220% 100%;
@@ -1713,23 +1599,6 @@ td.q {
 
 .btn.bloom:hover {
   background-position: 100% 0;
-  transform: translateY(-3px);
-  animation: halo 3s linear infinite;
-}
-
-.btn.bloom:active {
-  transform: translateY(0) scale(0.96);
-  transition-duration: 0.08s;
-}
-
-@keyframes halo {
-  0%   { box-shadow: 0 0 0 4px rgba(53, 103, 176, 0.45), 0 18px 40px -12px rgba(53, 103, 176, 0.9); }
-  17%  { box-shadow: 0 0 0 4px rgba(31, 138, 150, 0.45), 0 18px 40px -12px rgba(31, 138, 150, 0.9); }
-  33%  { box-shadow: 0 0 0 4px rgba(63, 143, 69, 0.45), 0 18px 40px -12px rgba(63, 143, 69, 0.9); }
-  50%  { box-shadow: 0 0 0 4px rgba(185, 138, 18, 0.45), 0 18px 40px -12px rgba(185, 138, 18, 0.9); }
-  67%  { box-shadow: 0 0 0 4px rgba(208, 97, 42, 0.45), 0 18px 40px -12px rgba(208, 97, 42, 0.9); }
-  83%  { box-shadow: 0 0 0 4px rgba(176, 53, 101, 0.45), 0 18px 40px -12px rgba(176, 53, 101, 0.9); }
-  100% { box-shadow: 0 0 0 4px rgba(53, 103, 176, 0.45), 0 18px 40px -12px rgba(53, 103, 176, 0.9); }
 }
 
 /* Main action buttons: deep violet that brightens toward the bloom accent */
@@ -1745,14 +1614,8 @@ td.q {
   background: linear-gradient(120deg, var(--night-2) 0%, #4a2a96 55%, var(--focus) 100%);
   background-size: 200% 100%;
   background-position: 100% 0;
-  transform: translateY(-2px);
   box-shadow: 0 0 0 3px rgba(122, 76, 240, 0.22), 0 16px 30px -14px rgba(122, 76, 240, 0.95),
     inset 0 -2px 0 var(--bloom);
-}
-
-.btn.primary:active:not(:disabled) {
-  transform: translateY(0) scale(0.96);
-  transition-duration: 0.08s;
 }
 
 /* Secondary buttons */
@@ -1765,23 +1628,13 @@ td.q {
   border-color: var(--bloom);
   color: var(--bloom-deep);
   background: var(--bloom-soft);
-  transform: translateY(-2px);
   box-shadow: 0 10px 22px -14px rgba(224, 69, 123, 0.9);
-}
-
-.btn.ghost:active:not(:disabled) {
-  transform: scale(0.96);
 }
 
 /* Model cards */
 .choice:hover:not(:disabled):not(.selected) {
   border-color: var(--focus);
   box-shadow: 0 0 0 3px rgba(122, 76, 240, 0.12), 0 18px 32px -20px rgba(26, 16, 51, 0.6);
-}
-
-.choice:active:not(:disabled) {
-  transform: scale(0.97);
-  transition-duration: 0.08s;
 }
 
 /* Example chips take the colour of the level they belong to */
@@ -1801,12 +1654,7 @@ td.q {
   background: var(--tone-soft);
   border-color: var(--tone);
   color: var(--tone);
-  transform: translateY(-2px);
   box-shadow: 0 8px 16px -10px var(--tone);
-}
-
-.chip:active {
-  transform: scale(0.95);
 }
 
 /* Tabs */
@@ -1817,10 +1665,6 @@ td.q {
 .tab:hover:not(.active) {
   color: var(--focus);
   background: rgba(122, 76, 240, 0.07);
-}
-
-.tab:active {
-  transform: scale(0.97);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1835,14 +1679,8 @@ td.q {
     scroll-behavior: auto;
   }
   .band::before,
-  .band::after,
-  .flower svg,
-  .flower .bloom-core,
-  .btn.bloom:hover {
+  .band::after {
     animation: none !important;
-  }
-  .ripple {
-    display: none;
   }
 }
 

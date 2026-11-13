@@ -899,43 +899,7 @@ function VisitCounter() {
   );
 }
 
-/* Pointer effects for every interactive surface: a light that follows the
-   cursor (CSS variables --mx and --my) and a ripple from the point of a click. */
-const FX_SELECTOR = ".btn, .choice, .chip, .tab, .topnav a";
-
-function usePointerEffects() {
-  useEffect(() => {
-    const move = (e) => {
-      const el = e.target.closest && e.target.closest(FX_SELECTOR);
-      if (!el) return;
-      const r = el.getBoundingClientRect();
-      el.style.setProperty("--mx", `${e.clientX - r.left}px`);
-      el.style.setProperty("--my", `${e.clientY - r.top}px`);
-    };
-    const down = (e) => {
-      const el = e.target.closest && e.target.closest(".btn, .choice, .chip, .tab");
-      if (!el || el.disabled) return;
-      const r = el.getBoundingClientRect();
-      const size = Math.max(r.width, r.height) * 2.2;
-      const dot = document.createElement("span");
-      dot.className = "ripple";
-      dot.style.width = dot.style.height = `${size}px`;
-      dot.style.left = `${e.clientX - r.left - size / 2}px`;
-      dot.style.top = `${e.clientY - r.top - size / 2}px`;
-      el.appendChild(dot);
-      dot.addEventListener("animationend", () => dot.remove());
-    };
-    document.addEventListener("pointermove", move, { passive: true });
-    document.addEventListener("pointerdown", down);
-    return () => {
-      document.removeEventListener("pointermove", move);
-      document.removeEventListener("pointerdown", down);
-    };
-  }, []);
-}
-
 export default function DeepBloom() {
-  usePointerEffects();
   const [choice, setChoice] = useState("distilbert");
   const [tool, setTool] = useState("single");
   const [available, setAvailable] = useState({});
