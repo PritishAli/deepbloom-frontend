@@ -579,7 +579,7 @@ function SingleQuestion({ choice, available, onBusy }) {
               <h3 className="table-title">Why this level?</h3>
               <div className="why">
                 <p>
-                  A <strong>{level.key}</strong> question asks learners to {level.meaning.toLowerCase()}. Questions at
+                  {/^[AEIOU]/.test(level.key) ? "An" : "A"} <strong>{level.key}</strong> question asks learners to {level.meaning.toLowerCase()}. Questions at
                   this level often use words such as <em>{level.verbs}</em>.
                 </p>
                 {(result.chosen.explanation || []).length > 0 && (
